@@ -1,3 +1,3 @@
-import { useUpdateTodo, useGetTodos } from './todos'
+import { useMutationTodo, useGetTodos } from './todos'
 
-export { useUpdateTodo, useGetTodos }
+export { useMutationTodo, useGetTodos }

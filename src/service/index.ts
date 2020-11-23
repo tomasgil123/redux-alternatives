@@ -1,3 +1,3 @@
-import { updateTodo } from './todos'
+import { mutations, getTodos } from './todos'
 
-export { updateTodo }
+export { mutations, getTodos }

@@ -16,7 +16,7 @@ const Layout: React.FunctionComponent<LayoutProps> = ({ children }) => {
     <>
       <div>
         <span>Layout</span>
-        <div>{`Elements in the layout: ${data.length} `}</div>
+        <div>{`Elements in the layout: ${data?.length} `}</div>
         {children}
       </div>
     </>
