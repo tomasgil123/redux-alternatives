@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { QueryClient, QueryClientProvider } from 'react-query'
 
 //styles
@@ -17,6 +17,21 @@ type AppLayoutProps = {
 
 function MyApp({ Component, pageProps }: AppLayoutProps): JSX.Element {
   const Layout = Component.layout ? Component.layout : React.Fragment
+
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('/sw.js').then(
+          function (registration) {
+            console.log('Service Worker registration successful with scope: ', registration.scope)
+          },
+          function (err) {
+            console.log('Service Worker registration failed: ', err)
+          }
+        )
+      })
+    }
+  }, [])
 
   return (
     <QueryClientProvider client={queryCache}>

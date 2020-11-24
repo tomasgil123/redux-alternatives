@@ -35,8 +35,9 @@ const addTodo = ({ todos, newTodo }: TodoMutation): any => {
   return [...todos, newTodo]
 }
 
-//PROBLEM: useMutation does not return errors. We dont have a way to know something fails when it does
+//PROBLEM: useMutation does not return errors. We dont have a way to know if something fails and give feedback to the user
 // onSettle does not return anything
+// https://github.com/tannerlinsley/react-query/issues/121
 
 export const useMutationTodo = ({ typeMutation }: TypeMutation): ResultMutationTodo => {
   const cache = useQueryClient()
@@ -104,6 +105,8 @@ interface ResultGetTodos {
 }
 
 export const useGetTodos = (): ResultGetTodos => {
-  const { isLoading, error, data } = useQuery('todos', () => getTodos().then((res) => res.json()))
+  const { isLoading, error, data } = useQuery('todos', () => getTodos().then((res) => res.json()), {
+    refetchOnMount: false,
+  })
   return { isLoading, error, data }
 }
