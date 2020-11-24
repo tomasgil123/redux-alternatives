@@ -32,7 +32,7 @@ self.addEventListener('fetch', function async(event) {
   // another way of stumbling into this problem is opening another tab with the same site. In this
   // case the problem always appears.
 
-  if (event.request.url === 'http://localhost:3002/api/getTodos') {
+  if (event.request.url.includes('/api/getTodos')) {
     event.respondWith(
       (async function () {
         //we open the cache
