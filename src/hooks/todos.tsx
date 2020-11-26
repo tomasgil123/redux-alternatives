@@ -68,7 +68,9 @@ export const useMutationTodo = ({ typeMutation }: TypeMutation): ResultMutationT
     },
     // If the mutation fails (not confuse with the request), use the value returned from onMutate to roll back
     onError: (err, variables, previousValue) => {
-      return cache.setQueryData('todos', previousValue) as any
+      const todos = cache.getQueryData('todos')
+      cache.setQueryData('todos', previousValue)
+      return todos as any
     },
     // Always refetch after error or success:
     onSettled: (data, error, newTodo, previousValue) => {
