@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { QueryClient, QueryClientProvider } from 'react-query'
+import { QueryCache, ReactQueryCacheProvider } from 'react-query'
 
 //styles
 import 'src/styles/globals.css'
@@ -7,7 +7,7 @@ import 'src/styles/globals.css'
 //types
 import PageWithLayoutType from 'src/types/pageWithLayout'
 
-const queryCache = new QueryClient()
+const queryCache = new QueryCache()
 
 type AppLayoutProps = {
   Component: PageWithLayoutType
@@ -34,11 +34,11 @@ function MyApp({ Component, pageProps }: AppLayoutProps): JSX.Element {
   }, [])
 
   return (
-    <QueryClientProvider client={queryCache}>
+    <ReactQueryCacheProvider queryCache={queryCache}>
       <Layout>
         <Component {...pageProps} />
       </Layout>
-    </QueryClientProvider>
+    </ReactQueryCacheProvider>
   )
 }
 

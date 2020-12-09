@@ -1,10 +1,4 @@
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-  MutationFunction,
-  UseMutateFunction,
-} from 'react-query'
+import { useMutation, useQuery, useQueryCache } from 'react-query'
 import { ADD_TODO, REMOVE_TODO, UPDATE_TODO } from 'src/constants'
 import { mutations, getTodos } from 'src/service'
 
@@ -12,7 +6,7 @@ import { mutations, getTodos } from 'src/service'
 import { ListItem, TypeMutation } from 'src/types/components'
 
 interface ResultMutationTodo {
-  mutate: UseMutateFunction
+  mutate: (listItem: ListItem) => void
   error: any
 }
 
@@ -40,15 +34,14 @@ const addTodo = ({ todos, newTodo }: TodoMutation): any => {
 // https://github.com/tannerlinsley/react-query/issues/121
 
 export const useMutationTodo = ({ typeMutation }: TypeMutation): ResultMutationTodo => {
-  const cache = useQueryClient()
-  const { mutate, error } = useMutation<unknown>(mutations[typeMutation] as MutationFunction, {
+  const cache = useQueryCache()
+
+  //error, isError, isLoading dont return anything. We will have to handle those status ourselves
+  const [mutate, { error, isError, isLoading }] = useMutation<unknown>(mutations[typeMutation], {
     // When mutate is called:
     onMutate: (newTodo) => {
       // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
       cache.cancelQueries('todos')
-
-      // Snapshot the previous value
-      const previousTodos = cache.getQueryData('todos')
 
       // Optimistically update to the new value
       cache.setQueryData('todos', (old: ListItem[]) => {
@@ -56,15 +49,13 @@ export const useMutationTodo = ({ typeMutation }: TypeMutation): ResultMutationT
           return updateTodo({ todos: old, newTodo })
         }
         if (typeMutation === ADD_TODO) {
-          console.log('newTodo add todo', newTodo)
           return addTodo({ todos: old, newTodo })
         }
         if (typeMutation === REMOVE_TODO) {
-          console.log('newTodo remove todo', newTodo)
           return removeTodo({ todos: old, newTodo })
         }
       })
-      return previousTodos
+      return cache.getQueryData('todos')
     },
     // If the mutation fails (not confuse with the request), use the value returned from onMutate to roll back
     onError: (err, variables, previousValue) => {
@@ -74,27 +65,19 @@ export const useMutationTodo = ({ typeMutation }: TypeMutation): ResultMutationT
     },
     // Always refetch after error or success:
     onSettled: (data, error, newTodo, previousValue) => {
-      //previousValue is the list of todos before the change
-      //by modifying the cahce again we avoid some buggy situations when going back online from an offline context
-      if (!error) {
-        cache.setQueryData('todos', () => {
-          if (typeMutation === UPDATE_TODO) {
-            return updateTodo({ todos: previousValue as ListItem[], newTodo })
-          }
-          if (typeMutation === ADD_TODO) {
-            console.log('newTodo add todo', newTodo)
-            return addTodo({ todos: previousValue as ListItem[], newTodo })
-          }
-          if (typeMutation === REMOVE_TODO) {
-            console.log('newTodo remove todo', newTodo)
-            return removeTodo({ todos: previousValue as ListItem[], newTodo })
-          }
-        })
-      } else {
-        cache.setQueryData('todos', () => previousValue)
+      // Como sabemos que tipo de request es? Por typeMutation. A su vez, podemos obtener el body de la variable newTodo
+
+      // - previousValue parece que dejo de venir. Parece que no viene cuando no hay un error, si hay un error si viene
+
+      if ((error as any).message) {
+        if (!((error as any).message === 'Failed to fetch')) {
+          cache.setQueryData('todos', () => previousValue)
+        }
+
+        //if request failed to fetch, we save the results in the indexedDB
+        //we also need to save the request
       }
     },
-    retry: 1,
   })
 
   return { mutate, error }

@@ -16,6 +16,8 @@ const Parent = (): JSX.Element => {
   //esto se esta ejecutando despues del que esta en el layout. Porque?
   const { isLoading, error, data } = useGetTodos()
 
+  console.log('data todos', data)
+
   const { mutate, error: errorGetTodos } = useMutationTodo({ typeMutation: ADD_TODO })
 
   const onAddNewTodo = (): void => {
@@ -25,7 +27,7 @@ const Parent = (): JSX.Element => {
       title: `new todo ${_id}`,
       completed: false,
     }
-    mutate((newTodo as unknown) as void)
+    mutate(newTodo)
   }
 
   if (isLoading) return <div>Loading items...</div>
